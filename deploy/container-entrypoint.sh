@@ -1,12 +1,14 @@
 #!/bin/sh
 set -eu
 
+export DJANGO_SETTINGS_MODULE=webapp.settings
 export ACQUISITION_DATA_DIR="${ACQUISITION_DATA_DIR:-/data}"
 mkdir -p "$ACQUISITION_DATA_DIR"
 
-# Restore the latest durable snapshot before Django migrations or Gunicorn touch SQLite.
+# Restore before Django or OpenOutFind opens either SQLite database.
 python -m webapp.core.state_backup restore
 python web_manage.py migrate --noinput
+python -m webapp.core.state_backup backup
 python web_manage.py collectstatic --noinput
 
 exec gunicorn webapp.wsgi:application \
