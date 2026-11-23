@@ -54,3 +54,38 @@ class WorkspaceIsolationTests(TestCase):
         )
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("dashboard"))
+
+    def test_service_profile_is_workspace_scoped_and_editable(self):
+        self.client.force_login(self.user)
+        response = self.client.post(
+            reverse("settings"),
+            {
+                "service_name": "Local SEO",
+                "service_description": "Improve local search visibility",
+                "ideal_customer_description": "Independent clinics in the United States",
+                "target_industries": "Healthcare, Dental",
+                "target_locations": "United States",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        from webapp.core.models import ServiceProfile
+        profile = ServiceProfile.objects.get(workspace=self.workspace)
+        self.assertEqual(profile.service_name, "Local SEO")
+        self.assertEqual(profile.target_industries, ["Healthcare", "Dental"])
+
+    def test_research_analyzer_reports_missing_on_page_seo_fields(self):
+        from webapp.core.research import analyze_page
+        page = {
+            "title": "",
+            "meta": {},
+            "headings": [],
+            "text": "Welcome to our business",
+            "links": [],
+            "forms": 0,
+            "images": 0,
+            "images_missing_alt": 0,
+        }
+        categories = {item["category"] for item in analyze_page(page)}
+        self.assertIn("seo", categories)
+        self.assertIn("local_seo", categories)
+        self.assertIn("conversion", categories)
