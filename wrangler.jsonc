@@ -8,9 +8,6 @@
     {
       "class_name": "AcquisitionContainer",
       "scheduling_policy": "durable_object",
-      "instances": 1,
-      "max_instances": 1,
-      "instance_type": "basic",
       "images": {
         "base": { "dockerfile": "./Dockerfile" }
       }
