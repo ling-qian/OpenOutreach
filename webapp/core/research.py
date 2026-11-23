@@ -131,7 +131,7 @@ def analyze_page(page: dict) -> list[dict]:
         findings.append(("seo", "Missing H1 heading", "No non-empty H1 heading was found.", 85))
     elif len(h1) > 1:
         findings.append(("seo", "Multiple H1 headings", f"Found {len(h1)} H1 headings; review whether the page has one clear primary topic.", 65))
-    if not page["meta"].get("robots", "").lower().find("noindex") < 0:
+    if "noindex" in page["meta"].get("robots", "").lower():
         findings.append(("seo", "Homepage may be noindexed", "The robots meta directive contains noindex.", 95))
     text = page["text"].lower()
     local_terms = ("address", "phone", "contact", "location", "hours", "service area")
