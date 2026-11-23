@@ -47,6 +47,16 @@ def opportunities(request):
 def settings_page(request):
     workspace = _workspace_for(request.user)
     profile = getattr(workspace, "service_profile", None)
+    if request.method == "POST":
+        profile, _ = ServiceProfile.objects.get_or_create(workspace=workspace)
+        profile.service_name = request.POST.get("service_name", "").strip()[:160]
+        profile.service_description = request.POST.get("service_description", "").strip()
+        profile.ideal_customer_description = request.POST.get("ideal_customer_description", "").strip()
+        profile.target_industries = [v.strip() for v in request.POST.get("target_industries", "").split(",") if v.strip()]
+        profile.target_locations = [v.strip() for v in request.POST.get("target_locations", "").split(",") if v.strip()]
+        profile.save()
+        messages.success(request, "Service profile saved.")
+        return redirect("settings")
     return render(request, "acquisition/settings.html", {"workspace": workspace, "profile": profile})
 
 
