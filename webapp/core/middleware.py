@@ -46,4 +46,11 @@ class StateBackupMiddleware:
                 # Surface durability failures in Container logs without hiding the
                 # original response. The startup restore remains fail-closed.
                 logger.exception("Failed to persist changed SQLite state to R2")
+                response.status_code = 503
+                if not getattr(response, "streaming", False):
+                    response.content = (
+                        b"SQLite data changed, but the durable R2 backup failed. "
+                        b"The latest change may not survive a Container restart."
+                    )
+                response["X-Acquisition-State-Persistence"] = "failed"
         return response
