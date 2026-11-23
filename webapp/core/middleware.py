@@ -1,29 +1,49 @@
-"""Persist SQLite state to R2 after mutating requests."""
+"""Persist changed SQLite state to R2 at request boundaries."""
 from __future__ import annotations
 
 import logging
 import threading
+from pathlib import Path
+
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 _backup_lock = threading.Lock()
 
 
+def _sqlite_signature():
+    root = Path(settings.ACQUISITION_DATA_DIR)
+    if not root.exists():
+        return ()
+    result = []
+    for path in root.rglob("*"):
+        if path.is_file() and (".sqlite" in path.name or path.suffix == ".db"):
+            try:
+                stat = path.stat()
+                result.append((str(path), stat.st_size, stat.st_mtime_ns))
+            except FileNotFoundError:
+                continue
+    return tuple(sorted(result))
+
+
 class StateBackupMiddleware:
-    """Best-effort request-boundary snapshot; startup restore is performed by entrypoint."""
+    """Snapshot only when a request actually changed a SQLite database file."""
 
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
+        before = _sqlite_signature()
         response = self.get_response(request)
-        if request.method in {"POST", "PUT", "PATCH", "DELETE"} and response.status_code < 500:
+        after = _sqlite_signature()
+        if after != before:
             try:
                 from webapp.core.state_backup import backup
 
                 with _backup_lock:
                     backup()
             except Exception:
-                # Do not turn a successful user action into a 500, but surface the
-                # durability failure in Container logs for operator follow-up.
-                logger.exception("Failed to persist SQLite snapshot to R2")
+                # Surface durability failures in Container logs without hiding the
+                # original response. The startup restore remains fail-closed.
+                logger.exception("Failed to persist changed SQLite state to R2")
         return response
