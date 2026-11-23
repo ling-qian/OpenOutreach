@@ -141,6 +141,4 @@ def analyze_page(page: dict) -> list[dict]:
     cta_links = [link for link in page["links"] if any(term in (link["text"] + " " + link["href"]).lower() for term in cta_terms)]
     if not cta_links and page["forms"] == 0:
         findings.append(("conversion", "No obvious primary conversion action", "The homepage contains no detected contact/booking/quote CTA link and no HTML form. Check other pages and rendered interactions before concluding the site lacks a conversion path.", 60))
-    if page["images"] and not any("alt" in item for item in []):
-        findings.append(("accessibility", "Image alternative text not measured", f"Found {page['images']} images; this lightweight pass does not yet inspect every image alt attribute.", 40))
     return [{"category": c, "title": t, "detail": d, "confidence": score} for c, t, d, score in findings]
