@@ -14,6 +14,14 @@ on:
 jobs:
   webapp:
     runs-on: ubuntu-latest
+    env:
+      DJANGO_SETTINGS_MODULE: webapp.settings
+      DJANGO_SECRET_KEY: ci-only-not-for-production
+      OPENOUTFIND_PRODUCT_DOCS: "CI fixture service description"
+      OPENOUTFIND_CAMPAIGN_TARGET: "CI fixture target customers"
+      OPENOUTFIND_AI_MODEL: "openai:gpt-4o-mini"
+      OPENOUTFIND_LLM_API_KEY: "ci-not-used"
+      OPENOUTFIND_BETTERCONTACT_API_KEY: "ci-not-used"
     steps:
       - uses: actions/checkout@v4
 
