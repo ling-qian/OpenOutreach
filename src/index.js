@@ -25,11 +25,10 @@ export class AcquisitionContainer extends DurableObject {
     const originalHost = request.headers.get("host") || url.host;
     url.protocol = "http:";
     url.host = "container";
-    const headers = new Headers(request.headers);
-    headers.delete("host");
-    headers.set("x-forwarded-host", originalHost);
-    headers.set("x-forwarded-proto", new URL(request.url).protocol.replace(":", ""));
-    const forwarded = new Request(url, { method: request.method, headers, body: request.body, redirect: "manual" });
+    const forwarded = new Request(url, request);
+    forwarded.headers.delete("host");
+    forwarded.headers.set("x-forwarded-host", originalHost);
+    forwarded.headers.set("x-forwarded-proto", new URL(request.url).protocol.replace(":", ""));
     return this.ctx.container.getTcpPort(PORT).fetch(forwarded);
   }
 
@@ -41,9 +40,9 @@ export class AcquisitionContainer extends DurableObject {
         instance: "basic",
         enableInternet: true,
         env: {
-          DJANGO_SECRET_KEY: this.env.DJANGO_SECRET_KEY,
-          DJANGO_ALLOWED_HOSTS: this.env.DJANGO_ALLOWED_HOSTS || "container,localhost",
-          DJANGO_CSRF_TRUSTED_ORIGINS: this.env.DJANGO_CSRF_TRUSTED_ORIGINS || "",
+          DJANGO_SECRET_KEY: this.env.DJANGO_SECRET_KEY || "",
+          DJANGO_ALLOWED_HOSTS: this.env.DJANGO_ALLOWED_HOSTS || ".workers.dev,container,localhost",
+          DJANGO_CSRF_TRUSTED_ORIGINS: this.env.DJANGO_CSRF_TRUSTED_ORIGINS || "https://*.workers.dev",
           OPENOUTFIND_BETTERCONTACT_API_KEY: this.env.OPENOUTFIND_BETTERCONTACT_API_KEY || "",
           OPENOUTFIND_AI_MODEL: this.env.OPENOUTFIND_AI_MODEL || "",
           OPENOUTFIND_LLM_API_KEY: this.env.OPENOUTFIND_LLM_API_KEY || "",
@@ -66,7 +65,7 @@ export class AcquisitionContainer extends DurableObject {
       } catch {
         // Container process may still be starting.
       }
-      await new Promise((resolve) => setTimeout(resolve, 250));
+      await scheduler.wait(250);
     }
     throw new Error("Acquisition Agent container did not become ready on port 8080");
   }
