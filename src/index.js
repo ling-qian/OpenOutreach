@@ -44,6 +44,8 @@ export class AcquisitionContainer extends DurableObject {
           DJANGO_ALLOWED_HOSTS: this.env.DJANGO_ALLOWED_HOSTS || ".workers.dev,container,localhost",
           DJANGO_CSRF_TRUSTED_ORIGINS: this.env.DJANGO_CSRF_TRUSTED_ORIGINS || "https://*.workers.dev",
           OPENOUTFIND_BETTERCONTACT_API_KEY: this.env.OPENOUTFIND_BETTERCONTACT_API_KEY || "",
+          OPENOUTFIND_PRODUCT_DOCS: "Professional SEO services for small businesses",
+          OPENOUTFIND_CAMPAIGN_TARGET: "Independent small businesses in the United States",
           OPENOUTFIND_AI_MODEL: this.env.OPENOUTFIND_AI_MODEL || "",
           OPENOUTFIND_LLM_API_KEY: this.env.OPENOUTFIND_LLM_API_KEY || "",
           OPENOUTFIND_LLM_API_BASE: this.env.OPENOUTFIND_LLM_API_BASE || "",
