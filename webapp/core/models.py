@@ -33,7 +33,6 @@ class Company(models.Model):
 
     class Meta:
         ordering = ["-updated_at"]
-        constraints = [models.UniqueConstraint(fields=["workspace", "website"], name="uniq_company_website_per_workspace")]
 
 
 class Evidence(models.Model):
