@@ -28,6 +28,9 @@ Set these Worker secrets. Do not commit them or paste them into source files:
 
 ```bash
 npx wrangler secret put DJANGO_SECRET_KEY
+npx wrangler secret put BOOTSTRAP_ADMIN_USERNAME
+npx wrangler secret put BOOTSTRAP_ADMIN_EMAIL
+npx wrangler secret put BOOTSTRAP_ADMIN_PASSWORD
 npx wrangler secret put R2_ACCOUNT_ID
 npx wrangler secret put R2_ACCESS_KEY_ID
 npx wrangler secret put R2_SECRET_ACCESS_KEY
@@ -36,6 +39,10 @@ npx wrangler secret put OPENOUTFIND_BETTERCONTACT_API_KEY
 npx wrangler secret put OPENOUTFIND_AI_MODEL
 npx wrangler secret put OPENOUTFIND_LLM_API_KEY
 ```
+
+The bootstrap administrator is created only if that username does not already exist.
+Use a strong unique password and keep it in Cloudflare Secrets. The app does not expose
+a public registration route in this MVP.
 
 Optional settings:
 - `DJANGO_ALLOWED_HOSTS`: comma-separated hosts; default allows `.workers.dev`.
