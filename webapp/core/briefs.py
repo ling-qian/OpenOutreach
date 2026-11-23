@@ -47,4 +47,16 @@ def generate_brief(profile, company, evidence):
     )
     agent = Agent(get_llm_model(), output_type=Brief, system_prompt="You are a cautious B2B website research analyst. Never invent evidence.")
     result = run_agent_sync(agent.run(prompt))
-    return result.output.model_dump()
+    output = result.output.model_dump()
+    allowed_ids = {item.pk for item in evidence}
+    # The model is not trusted to cite IDs accurately. Drop any finding whose
+    # evidence list is empty or contains an ID that was not supplied to the prompt.
+    verified = []
+    for finding in output.get("findings", [])[:6]:
+        cited = set(finding.get("evidence_ids", []))
+        if cited and cited.issubset(allowed_ids):
+            verified.append(finding)
+    output["findings"] = verified
+    if not verified:
+        raise ValueError("The model returned no findings with verifiable evidence references.")
+    return output
