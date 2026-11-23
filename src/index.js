@@ -41,6 +41,9 @@ export class AcquisitionContainer extends DurableObject {
         enableInternet: true,
         env: {
           DJANGO_SECRET_KEY: this.env.DJANGO_SECRET_KEY || "",
+          BOOTSTRAP_ADMIN_USERNAME: this.env.BOOTSTRAP_ADMIN_USERNAME || "",
+          BOOTSTRAP_ADMIN_EMAIL: this.env.BOOTSTRAP_ADMIN_EMAIL || "",
+          BOOTSTRAP_ADMIN_PASSWORD: this.env.BOOTSTRAP_ADMIN_PASSWORD || "",
           DJANGO_ALLOWED_HOSTS: this.env.DJANGO_ALLOWED_HOSTS || ".workers.dev,container,localhost",
           DJANGO_CSRF_TRUSTED_ORIGINS: this.env.DJANGO_CSRF_TRUSTED_ORIGINS || "https://*.workers.dev",
           OPENOUTFIND_BETTERCONTACT_API_KEY: this.env.OPENOUTFIND_BETTERCONTACT_API_KEY || "",
