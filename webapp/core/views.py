@@ -83,13 +83,13 @@ def discover_companies(request):
                               "discovery_source_url": row.get("linkedin_url", "")[:1000],
                               "prospect_contacts": [{
                                   "name": row.get("full_name") or " ".join(filter(None, [row.get("first_name"), row.get("last_name")])),
-                                  "title": row.get("title", ""), "profile_url": row.get("linkedin_url", ""),
+                                  "title": row.get("title", ""), "profile_url": row.get("linkedin_url") or row.get("profile_url", ""),
                                   "email": row.get("email", ""), "reason": row.get("reason", ""),
                               }]})
                 if not created:
                     contacts = list(company.prospect_contacts or [])
                     contacts.append({"name": row.get("full_name", ""), "title": row.get("title", ""),
-                                     "profile_url": row.get("linkedin_url", ""), "email": row.get("email", ""),
+                                     "profile_url": row.get("linkedin_url") or row.get("profile_url", ""), "email": row.get("email", ""),
                                      "reason": row.get("reason", "")})
                     company.prospect_contacts = contacts
                     company.save(update_fields=["prospect_contacts", "updated_at"])
