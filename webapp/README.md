@@ -12,7 +12,7 @@ python web_manage.py createsuperuser
 python web_manage.py runserver
 ```
 
-Open http://127.0.0.1:8000/accounts/login/ and sign in. A workspace is created automatically for each authenticated user. Use /admin/ to manage sample companies, evidence and opportunities while discovery and research integrations are being connected.
+Open http://127.0.0.1:8000/accounts/login/ and sign in. A workspace is created automatically for each authenticated user. Use /admin/ to manage companies, evidence, opportunities and service profiles while discovery and research integrations are being connected. Create the first admin account with `createsuperuser`.
 
 ## Architecture
 
