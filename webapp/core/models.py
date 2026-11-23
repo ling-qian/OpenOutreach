@@ -28,6 +28,10 @@ class Company(models.Model):
     industry = models.CharField(max_length=160, blank=True)
     location = models.CharField(max_length=240, blank=True)
     source = models.CharField(max_length=80, default="manual")
+    prospect_contacts = models.JSONField(default=list, blank=True)
+    icp_verdict = models.CharField(max_length=24, blank=True)
+    icp_reason = models.TextField(blank=True)
+    discovery_source_url = models.URLField(max_length=1000, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -54,6 +58,7 @@ class Opportunity(models.Model):
     stage = models.CharField(max_length=24, choices=STAGES, default="new")
     summary = models.TextField(blank=True)
     recommended_service = models.CharField(max_length=240, blank=True)
+    brief_data = models.JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
