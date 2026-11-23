@@ -1,17 +1,13 @@
-"""R2 snapshot/restore for SQLite files on the ephemeral Container filesystem.
-
-The snapshot is a single gzip tar object. It includes Django's SQLite database and
-workspace-isolated OpenOutFind databases. Upload happens after mutating HTTP requests;
-startup restores the last complete object before migrations run.
-"""
+"""R2 snapshot/restore for SQLite files on the ephemeral Container filesystem."""
 from __future__ import annotations
 
 import io
 import os
 import sqlite3
 import tarfile
-import tempfile
 from pathlib import Path
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "webapp.settings")
 
 import boto3
 from botocore.exceptions import ClientError
@@ -28,7 +24,9 @@ def _client():
     required = ("R2_ACCOUNT_ID", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY", "R2_BUCKET_NAME")
     missing = [name for name in required if not os.environ.get(name)]
     if missing:
-        return None
+        if os.environ.get("ALLOW_EPHEMERAL_SQLITE", "").lower() == "true":
+            return None
+        raise RuntimeError("Durable SQLite requires R2 configuration; missing: " + ", ".join(missing))
     return boto3.client(
         "s3",
         endpoint_url=f"https://{os.environ['R2_ACCOUNT_ID']}.r2.cloudflarestorage.com",
@@ -44,25 +42,21 @@ def _object_key() -> str:
 
 def _sqlite_files() -> list[Path]:
     root = _data_dir()
-    return sorted(
-        path for path in root.rglob("*")
-        if path.is_file() and path.suffix in {".sqlite3", ".sqlite", ".db"}
-    )
+    return sorted(path for path in root.rglob("*") if path.is_file() and path.suffix in {".sqlite3", ".sqlite", ".db"})
 
 
 def restore() -> bool:
     """Restore latest archive if configured. Returns False when no snapshot exists."""
     client = _client()
     if client is None:
-        print("R2 snapshot storage is not configured; using container-local SQLite.")
+        print("WARNING: ALLOW_EPHEMERAL_SQLITE=true; Container-local data can be lost on restart.")
         return False
-
     try:
         response = client.get_object(Bucket=os.environ["R2_BUCKET_NAME"], Key=_object_key())
     except ClientError as exc:
         code = str(exc.response.get("Error", {}).get("Code", ""))
         if code in {"NoSuchKey", "404", "NotFound"}:
-            print("No prior SQLite snapshot found in R2; starting with an empty data directory.")
+            print("No prior SQLite snapshot found in R2; initializing an empty data directory.")
             return False
         raise
 
@@ -78,10 +72,9 @@ def restore() -> bool:
                     raise ValueError("Unsafe path in R2 SQLite snapshot.")
                 destination.parent.mkdir(parents=True, exist_ok=True)
                 source = archive.extractfile(member)
-                if source is None:
-                    continue
-                with destination.open("wb") as output:
-                    output.write(source.read())
+                if source is not None:
+                    with destination.open("wb") as output:
+                        output.write(source.read())
     finally:
         body.close()
     print("Restored SQLite snapshot from R2.")
@@ -92,7 +85,7 @@ def backup() -> bool:
     """Checkpoint SQLite WAL files and atomically replace the R2 snapshot object."""
     client = _client()
     if client is None:
-        print("R2 snapshot storage is not configured; SQLite changes remain container-local.")
+        print("WARNING: SQLite snapshot skipped because ephemeral mode is enabled.")
         return False
 
     root = _data_dir()
@@ -127,8 +120,5 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("action", choices=("restore", "backup"))
-    action = parser.parse_args().action
-    if action == "restore":
-        restore()
-    else:
-        backup()
+    selected = parser.parse_args().action
+    restore() if selected == "restore" else backup()
