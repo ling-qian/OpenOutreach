@@ -9,6 +9,7 @@ mkdir -p "$ACQUISITION_DATA_DIR"
 # Restore before Django or OpenOutFind opens either SQLite database.
 python -m webapp.core.state_backup restore
 python web_manage.py migrate --noinput
+python -m webapp.core.bootstrap_admin
 python -m webapp.core.state_backup backup
 python web_manage.py collectstatic --noinput
 
