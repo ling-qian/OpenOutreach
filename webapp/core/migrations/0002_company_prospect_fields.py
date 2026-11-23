@@ -9,4 +9,4 @@ class Migration(migrations.Migration):
         migrations.AddField(model_name="company", name="icp_reason", field=models.TextField(blank=True)),
         migrations.AddField(model_name="company", name="discovery_source_url", field=models.URLField(blank=True, max_length=1000)),
         migrations.AddField(model_name="opportunity", name="brief_data", field=models.JSONField(blank=True, default=dict)),
-    ],
+    ]
