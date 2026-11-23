@@ -45,6 +45,7 @@ class _PageParser(HTMLParser):
         self.text_parts = []
         self.headings = []
         self.links = []
+        self.active_link = None
         self.images = 0
         self.forms = 0
         self.meta = {}
@@ -65,12 +66,15 @@ class _PageParser(HTMLParser):
             self.canonical = attrs.get("href", "")[:1000]
         elif tag == "a":
             self.links.append({"text": "", "href": attrs.get("href", "")[:1000]})
+            self.active_link = len(self.links) - 1
         elif tag == "img":
             self.images += 1
         elif tag == "form":
             self.forms += 1
 
     def handle_endtag(self, tag):
+        if tag == "a":
+            self.active_link = None
         if tag == "title":
             self.in_title = False
         if tag in {"h1", "h2", "h3"}:
@@ -85,8 +89,10 @@ class _PageParser(HTMLParser):
         self.text_parts.append(value)
         if self.title and self.headings:
             self.headings[-1]["text"] = (self.headings[-1]["text"] + " " + value).strip()[:300]
-        if self.links and len(self.links[-1]["text"]) < 180:
-            self.links[-1]["text"] = (self.links[-1]["text"] + " " + value).strip()[:180]
+        if getattr(self, "active_link", None) is not None:
+            link = self.links[self.active_link]
+            if len(link["text"]) < 180:
+                link["text"] = (link["text"] + " " + value).strip()[:180]
 
 
 def fetch_page(url: str) -> dict:
