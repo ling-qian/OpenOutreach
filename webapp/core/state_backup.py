@@ -63,7 +63,10 @@ def restore() -> bool:
     root = _data_dir().resolve()
     body = response["Body"]
     try:
-        with tarfile.open(fileobj=body, mode="r:gz") as archive:
+        # boto3's StreamingBody is not seekable; buffer the snapshot before opening
+        # tarfile in random-access mode.
+        snapshot_bytes = body.read()
+        with tarfile.open(fileobj=io.BytesIO(snapshot_bytes), mode="r:gz") as archive:
             for member in archive.getmembers():
                 if not member.isfile():
                     continue
