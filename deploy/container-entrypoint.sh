@@ -1,6 +1,7 @@
 #!/bin/sh
 set -eu
 
+: "${DJANGO_SECRET_KEY:?DJANGO_SECRET_KEY Worker secret must be configured}"
 export DJANGO_SETTINGS_MODULE=webapp.settings
 export ACQUISITION_DATA_DIR="${ACQUISITION_DATA_DIR:-/data}"
 mkdir -p "$ACQUISITION_DATA_DIR"
