@@ -22,6 +22,7 @@ jobs:
       OPENOUTFIND_AI_MODEL: "openai:gpt-4o-mini"
       OPENOUTFIND_LLM_API_KEY: "ci-not-used"
       OPENOUTFIND_BETTERCONTACT_API_KEY: "ci-not-used"
+      ALLOW_EPHEMERAL_SQLITE: "true"
     steps:
       - uses: actions/checkout@v4
 
