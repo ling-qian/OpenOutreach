@@ -6,10 +6,7 @@ DEBUG = os.environ.get("DJANGO_DEBUG", "false").lower() == "true"
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "development-only-change-me")
 ALLOWED_HOSTS = [host.strip() for host in os.environ.get("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",") if host.strip()]
 ROOT_URLCONF = "webapp.urls"
-INSTALLED_APPS = [
-    "django.contrib.admin", "django.contrib.sessions", "django.contrib.messages", "django.contrib.staticfiles",
-    *INSTALLED_APPS, "webapp.core.apps.CoreWebConfig",
-]
+INSTALLED_APPS = [*INSTALLED_APPS, "webapp.core.apps.CoreWebConfig"]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
