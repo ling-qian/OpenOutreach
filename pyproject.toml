@@ -74,7 +74,7 @@ Source = "https://github.com/eracle/OpenOutreach"
 Issues = "https://github.com/eracle/OpenOutreach/issues"
 
 [tool.hatch.build.targets.wheel]
-packages = ["openoutreach"]
+packages = ["openoutreach", "webapp"]
 
 [tool.hatch.build.targets.sdist]
 include = ["openoutreach", "README.md", "LICENCE.md", "LEGAL_NOTICE.md", "pyproject.toml"]
