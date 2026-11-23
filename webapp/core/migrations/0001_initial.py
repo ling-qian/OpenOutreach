@@ -87,8 +87,4 @@ class Migration(migrations.Migration):
                 ("workspace", models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name="service_profile", to="acquisition_web.workspace")),
             ],
         ),
-        migrations.AddConstraint(
-            model_name="company",
-            constraint=models.UniqueConstraint(fields=("workspace", "website"), name="uniq_company_website_per_workspace"),
-        ),
     ]
