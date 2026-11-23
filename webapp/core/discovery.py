@@ -20,13 +20,12 @@ def discover(workspace, profile, count: int = 5) -> list[dict]:
     if not profile or not profile.ideal_customer_description.strip():
         raise ValueError("Complete the Ideal Customer Description in Service Profile first.")
 
-    # The upstream finder persists people and qualification state in its own Django
-    # tables. A separate SQLite file per workspace is essential: never share its
-    # install-level Lead/Deal tables between customers.
-    state_dir = Path(settings.BASE_DIR) / "var" / "openoutfind" / f"workspace-{workspace.pk}"
+    # A distinct SQLite file per workspace prevents cross-tenant lead-state leakage.
+    state_dir = Path(settings.ACQUISITION_DATA_DIR) / "openoutfind" / f"workspace-{workspace.pk}"
     state_dir.mkdir(parents=True, exist_ok=True)
     database = state_dir / "leads.sqlite3"
     env = os.environ.copy()
+    env["OPENOUTREACH_DB"] = str(database)
     env["OPENOUTFIND_CAMPAIGN_TARGET"] = profile.ideal_customer_description
     env["OPENOUTFIND_PRODUCT_DOCS"] = profile.service_description or profile.service_name or "Professional services"
     command = [
@@ -42,9 +41,6 @@ def discover(workspace, profile, count: int = 5) -> list[dict]:
             continue
         if isinstance(item, dict) and (item.get("linkedin_url") or item.get("profile_url")):
             records.append(item)
-    # The CLI intentionally exits non-zero when it cannot meet the requested count.
-    # Its JSONL stdout still contains every lead it did qualify; preserve those partial
-    # results instead of throwing away useful work.
     if not records and result.returncode != 0:
         detail = (result.stderr or result.stdout or "OpenOutFind did not complete.")[-2500:]
         raise RuntimeError(detail)
