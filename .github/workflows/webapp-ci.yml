@@ -1,0 +1,53 @@
+name: Web application checks
+
+on:
+  push:
+    branches: [feat/ai-acquisition-agent-web]
+  pull_request:
+    branches: [main]
+    paths:
+      - "webapp/**"
+      - "web_manage.py"
+      - "pyproject.toml"
+      - ".github/workflows/webapp-ci.yml"
+
+jobs:
+  webapp:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: astral-sh/setup-uv@v5
+
+      - name: Install project and test dependencies
+        run: uv pip install --system -e ".[dev]"
+
+      - name: Django system checks
+        env:
+          DJANGO_SETTINGS_MODULE: webapp.settings
+          DJANGO_SECRET_KEY: ci-only-not-for-production
+        run: python web_manage.py check
+
+      - name: Check migration state
+        env:
+          DJANGO_SETTINGS_MODULE: webapp.settings
+          DJANGO_SECRET_KEY: ci-only-not-for-production
+        run: python web_manage.py makemigrations --check --dry-run
+
+      - name: Apply database migrations
+        env:
+          DJANGO_SETTINGS_MODULE: webapp.settings
+          DJANGO_SECRET_KEY: ci-only-not-for-production
+          OPENOUTREACH_DB: /tmp/openoutreach-web-ci.sqlite3
+        run: python web_manage.py migrate --noinput
+
+      - name: Run web application tests
+        env:
+          DJANGO_SETTINGS_MODULE: webapp.settings
+          DJANGO_SECRET_KEY: ci-only-not-for-production
+          OPENOUTREACH_DB: /tmp/openoutreach-web-tests.sqlite3
+        run: pytest tests/test_webapp.py -q --ds=webapp.settings
