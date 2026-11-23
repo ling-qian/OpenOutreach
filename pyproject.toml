@@ -55,6 +55,8 @@ dependencies = [
     # than inherited from the finder: the rule above is that this file names what *this*
     # package imports directly.
     "pytz>=2024.1",
+    "whitenoise>=6.8,<7",
+    "boto3>=1.35,<2",
 ]
 
 [project.optional-dependencies]
