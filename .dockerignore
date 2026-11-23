@@ -1,7 +1,15 @@
 .git
 .github
 .venv
+venv
 .pytest_cache
 .idea
 __pycache__
 .vscode
+node_modules
+.env
+.coverage
+var
+data
+staticfiles
+tests
