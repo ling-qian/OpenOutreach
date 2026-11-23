@@ -1,1 +1,18 @@
-{% extends "acquisition/base.html" %}{% block title %}Service profile · Acquisition Agent{% endblock %}{% block heading %}Service profile{% endblock %}{% block content %}<div class="card"><div style="font-weight:700">Your offer and ideal customer</div><p class="muted">This profile will drive ICP qualification and personalized opportunity research.</p>{% if profile %}<p><strong>{{ profile.service_name }}</strong></p><p>{{ profile.service_description }}</p><p class="muted">Target industries: {{ profile.target_industries|join:", " }}</p>{% else %}<p class="muted">No service profile configured yet. Profile editing will be enabled with the next form/API increment.</p>{% endif %}</div>{% endblock %}
+{% extends "acquisition/base.html" %}
+{% block title %}Service profile · Acquisition Agent{% endblock %}
+{% block heading %}Service profile{% endblock %}
+{% block content %}
+<div class="card">
+  <div style="font-weight:700">Your offer and ideal customer</div>
+  <p class="muted">This profile is used for ICP qualification and evidence-grounded opportunity recommendations.</p>
+  <form method="post">{% csrf_token %}
+    <label>Service name<br><input name="service_name" value="{{ profile.service_name|default:'' }}" maxlength="160" required style="width:100%;padding:11px;border:1px solid #dbe2ea;border-radius:8px;margin:6px 0 14px"></label>
+    <label>What you sell<br><textarea name="service_description" rows="4" required style="width:100%;padding:11px;border:1px solid #dbe2ea;border-radius:8px;margin:6px 0 14px">{{ profile.service_description|default:'' }}</textarea></label>
+    <label>Ideal Customer Description (ICP)<br><textarea name="ideal_customer_description" rows="5" required placeholder="US-based independent dental clinics with 2–10 locations that need more local search leads..." style="width:100%;padding:11px;border:1px solid #dbe2ea;border-radius:8px;margin:6px 0 14px">{{ profile.ideal_customer_description|default:'' }}</textarea></label>
+    <label>Target industries (comma separated)<br><input name="target_industries" value="{{ profile.target_industries|join:', ' }}" style="width:100%;padding:11px;border:1px solid #dbe2ea;border-radius:8px;margin:6px 0 14px"></label>
+    <label>Target locations (comma separated)<br><input name="target_locations" value="{{ profile.target_locations|join:', ' }}" style="width:100%;padding:11px;border:1px solid #dbe2ea;border-radius:8px;margin:6px 0 18px"></label>
+    <button class="btn" type="submit" style="border:0;cursor:pointer">Save service profile</button>
+  </form>
+</div>
+<div class="notice">Discovery credentials are supplied through server environment variables, not stored in workspace records. Required for prospect discovery: OPENOUTFIND_BETTERCONTACT_API_KEY, OPENOUTFIND_AI_MODEL, OPENOUTFIND_LLM_API_KEY. For OpenAI-compatible models also set OPENOUTFIND_LLM_API_BASE.</div>
+{% endblock %}
