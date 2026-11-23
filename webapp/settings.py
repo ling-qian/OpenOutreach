@@ -6,7 +6,10 @@ DEBUG = os.environ.get("DJANGO_DEBUG", "false").lower() == "true"
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "development-only-change-me")
 ALLOWED_HOSTS = [host.strip() for host in os.environ.get("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",") if host.strip()]
 ROOT_URLCONF = "webapp.urls"
-INSTALLED_APPS = [*INSTALLED_APPS, "webapp.core.apps.CoreWebConfig"]
+INSTALLED_APPS = [
+    "django.contrib.admin", "django.contrib.sessions", "django.contrib.messages", "django.contrib.staticfiles",
+    *INSTALLED_APPS, "webapp.core.apps.CoreWebConfig",
+]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -21,12 +24,12 @@ TEMPLATES = [{
     "DIRS": [BASE_DIR / "webapp" / "templates"],
     "APP_DIRS": True,
     "OPTIONS": {"context_processors": [
-        "django.template.context_processors.debug",
-        "django.template.context_processors.request",
-        "django.contrib.auth.context_processors.auth",
-        "django.contrib.messages.context_processors.messages",
+        "django.template.context_processors.debug", "django.template.context_processors.request",
+        "django.contrib.auth.context_processors.auth", "django.contrib.messages.context_processors.messages",
     ]},
 }]
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 LOGIN_URL = "/accounts/login/"
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/accounts/login/"
