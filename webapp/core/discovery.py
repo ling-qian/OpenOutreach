@@ -40,7 +40,7 @@ def discover(workspace, profile, count: int = 5) -> list[dict]:
             item = json.loads(line)
         except json.JSONDecodeError:
             continue
-        if isinstance(item, dict) and item.get("profile_url"):
+        if isinstance(item, dict) and (item.get("linkedin_url") or item.get("profile_url")):
             records.append(item)
     # The CLI intentionally exits non-zero when it cannot meet the requested count.
     # Its JSONL stdout still contains every lead it did qualify; preserve those partial
