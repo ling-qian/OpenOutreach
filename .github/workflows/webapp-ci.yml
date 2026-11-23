@@ -39,7 +39,12 @@ jobs:
         env:
           DJANGO_SETTINGS_MODULE: webapp.settings
           DJANGO_SECRET_KEY: ci-only-not-for-production
-        run: python web_manage.py check
+        run: >-
+          python -c "import django; django.setup();
+          from django.core.checks import run_checks;
+          errors = run_checks();
+          [print(error) for error in errors];
+          raise SystemExit(bool(errors))"
 
       - name: Check migration state
         env:
